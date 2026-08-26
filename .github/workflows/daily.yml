@@ -1,0 +1,30 @@
+name: Daily Auto News Update
+on:
+  schedule:
+    - cron: '0 0 * * *' # Roz raat ko Pakistani waqt ke mutabiq subah 5 baje khud chalega
+  workflow_dispatch: # Isse aap GitHub par button daba kar bhi jab chahein chala sakte hain
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+
+    - name: Fetch Latest News
+      env:
+        NEWS_API_KEY: ${{ secrets.NEWS_API_KEY }}
+      run: node fetch-news.js
+
+    - name: Commit and Push changes
+      run: |
+        git config --global user.name "Auto News Bot"
+        git config --global user.email "bot@autonews.com"
+        git add news.json
+        git commit -m "Automated Daily News Update [skip ci]" || exit 0
+        git push
