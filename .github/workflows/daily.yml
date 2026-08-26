@@ -1,8 +1,8 @@
 name: Daily Auto News Update
 on:
   schedule:
-    - cron: '0 0 * * *' # Roz raat ko Pakistani waqt ke mutabiq subah 5 baje khud chalega
-  workflow_dispatch: # Isse aap GitHub par button daba kar bhi jab chahein chala sakte hain
+    - cron: '0 0 * * *'
+  workflow_dispatch:
 
 jobs:
   build:
