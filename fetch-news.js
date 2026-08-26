@@ -1,9 +1,8 @@
 const fs = require('fs');
 const https = require('https');
 
-const API_KEY = process.env.NEWS_API_KEY; 
-// Humne query ko bilkul asan kar dia taake block na ho aur global business/finance news direct uthaye
-const url = `https://newsapi.org{API_KEY}`;
+// Google News ki official free international business aur market RSS feed
+const url = 'https://google.com';
 
 const options = {
     headers: {
@@ -11,7 +10,7 @@ const options = {
     }
 };
 
-console.log("Fetching fresh global updates from all over the world...");
+console.log("Fetching fresh global updates from Google News Feed...");
 
 https.get(url, options, (res) => {
     let data = '';
@@ -22,43 +21,59 @@ https.get(url, options, (res) => {
 
     res.on('end', () => {
         try {
-            const parsedData = JSON.parse(data);
+            // Google News RSS se titles aur links nikaalne ka simple automated formula
+            const articles = [];
+            const items = data.split('<item>');
             
-            if (!parsedData.articles || parsedData.articles.length === 0) {
-                console.log("No news articles fetched. Saving empty array placeholder.");
-                // Agar backup chahiye to aik dummy article dal dete hain taake screen khali na rahe
-                const backup = [{
-                    title: "Global Markets and Financial Policy Updates",
-                    description: "International financial monitors are tracking fresh adjustments in global banking policy and trade relations. Full analysis reports will refresh shortly.",
-                    url: "https://newsapi.org",
-                    date: new Date().toISOString(),
-                    category: "Finance"
-                }];
-                fs.writeFileSync('news.json', JSON.stringify(backup, null, 2));
-                return;
+            // Pehle item ko chhor kar baqi top 12 articles uthayenge
+            for (let i = 1; i < Math.min(items.length, 13); i++) {
+                const item = items[i];
+                
+                const titleMatch = item.match(/<title>([\s\S]*?)<\/title>/);
+                const linkMatch = item.match(/<link>([\s\S]*?)<\/link>/);
+                const dateMatch = item.match(/<pubDate>([\s\S]*?)<\/pubDate>/);
+                
+                if (titleMatch && linkMatch) {
+                    let title = titleMatch[1].replace(/<!\[CDATA\[|\]\]>/g, '').trim();
+                    let urlLink = linkMatch[1].trim();
+                    let pubDate = dateMatch ? dateMatch[1] : new Date().toISOString();
+                    
+                    // Source name ko title se saaf karna (e.g., - Reuters)
+                    if (title.includes(' - ')) {
+                        title = title.split(' - ')[0];
+                    }
+
+                    let category = 'Finance';
+                    const titleLower = title.toLowerCase();
+                    if (titleLower.includes('govt') || titleLower.includes('policy') || titleLower.includes('sanction') || titleLower.includes('biden') || titleLower.includes('china')) {
+                        category = 'Geopolitics';
+                    }
+
+                    articles.push({
+                        title: title,
+                        description: 'Click the link below to view full coverage and official analysis on Google News network.',
+                        url: urlLink,
+                        date: pubDate,
+                        category: category
+                    });
+                }
             }
 
-            const formattedNews = parsedData.articles.map(article => {
-                let category = 'Finance';
-                const titleLower = article.title ? article.title.toLowerCase() : '';
-                // Dynamic category management
-                if (titleLower.includes('govt') || titleLower.includes('border') || titleLower.includes('biden') || titleLower.includes('war') || titleLower.includes('policy')) {
-                    category = 'Geopolitics';
-                }
+            if (articles.length === 0) {
+                console.log("Feed processing returned 0 articles. Saving placeholder.");
+                articles.push({
+                    title: "International Market Conditions and Geopolitical Monitor",
+                    description: "Global financial dashboards are compiling real-time intelligence feeds. System refresh will complete automatically.",
+                    url: "https://google.com",
+                    date: new Date().toISOString(),
+                    category: "Finance"
+                });
+            }
 
-                return {
-                    title: article.title || 'Global Intelligence Update',
-                    description: article.description || 'Click the link below to view full coverage and real-time data from the primary dashboard.',
-                    url: article.url || 'https://newsapi.org',
-                    date: article.publishedAt || new Date().toISOString(),
-                    category: category
-                };
-            });
-
-            fs.writeFileSync('news.json', JSON.stringify(formattedNews, null, 2));
-            console.log("Successfully saved today's reports to news.json!");
+            fs.writeFileSync('news.json', JSON.stringify(articles, null, 2));
+            console.log(`Successfully saved ${articles.length} global reports!`);
         } catch (error) {
-            console.error("System Error during parsing:", error.message);
+            console.error("Parsing Error:", error.message);
         }
     });
 
