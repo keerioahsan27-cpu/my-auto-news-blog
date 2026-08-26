@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Global Monitor | Finance & Geopolitics</title>
+    <style>
+        body { font-family: 'Georgia', serif; background-color: #fcfbf7; color: #111; margin: 0; padding: 20px; }
+        header { text-align: center; border-bottom: 4px double #0f1c3f; padding-bottom: 15px; margin-bottom: 30px; }
+        header h1 { font-size: 3rem; margin: 0; color: #0f1c3f; letter-spacing: 2px; font-weight: 900; }
+        header p { font-style: italic; color: #555; margin: 5px 0 0 0; font-size: 1.1rem; }
+        .main-container { display: grid; grid-template-columns: 3fr 1fr; gap: 40px; max-width: 1300px; margin: 0 auto; }
+        .news-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
+        @media (max-width: 900px) { .main-container { grid-template-columns: 1fr; } .news-grid { grid-template-columns: 1fr; } }
+        .card { background: white; padding: 25px; border: 1px solid #e2e0d9; box-shadow: 0 4px 6px rgba(0,0,0,0.01); border-top: 3px solid #0f1c3f; }
+        .card h2 { font-size: 1.5rem; margin-top: 0; color: #0f1c3f; line-height: 1.3; }
+        .card .meta { font-size: 0.8rem; color: #b58900; font-weight: bold; margin-bottom: 12px; text-transform: uppercase; font-family: Arial, sans-serif; letter-spacing: 1px; }
+        .card p { font-family: 'Arial', sans-serif; font-size: 0.95rem; line-height: 1.6; color: #333; }
+        .card a { color: #0f1c3f; font-weight: bold; text-decoration: none; font-family: Arial, sans-serif; font-size: 0.9rem; border-bottom: 1px solid #0f1c3f; transition: 0.2s; }
+        .card a:hover { color: #b58900; border-bottom-color: #b58900; }
+        .sidebar { background: #f4f6f9; padding: 25px; border-top: 4px solid #c0392b; height: fit-content; position: sticky; top: 20px; }
+        .sidebar h3 { margin-top: 0; color: #c0392b; font-size: 1.1rem; text-transform: uppercase; font-family: Arial, sans-serif; letter-spacing: 1px; }
+        .sidebar p { font-family: Arial, sans-serif; font-size: 0.85rem; line-height: 1.6; color: #444; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>THE GLOBAL MONITOR</h1>
+        <p>Automated Geopolitics & Financial Intelligence — Updated Daily</p>
+    </header>
+
+    <div class="main-container">
+        <!-- News Feed Grid -->
+        <div class="news-grid" id="news-feed">
+            <p style="font-family: Arial, sans-serif; color: #666;">Loading latest global intelligence report...</p>
+        </div>
+
+        <!-- Sidebar Legal Disclaimer Box -->
+        <div class="sidebar">
+            <h3>⚠️ AI Notice & Legal Disclaimer</h3>
+            <p><strong>Urdu Notice:</strong> Is website par mojood tamam news aur content automatic tareeqe se AI aur internet APIs ke zariye jama aur post kiya jata hai.</p>
+            <p>Website ka owner is content ko manually verify ya edit nahi karta. Agar is content me koi galti, galat bayani (misinformation), ya copyright ka masla hota hai, to website ka owner iska bilkul zimmedar (Not Responsible) nahi hoga. Users is information ko apne risk par istemal karein.</p>
+            <hr style="border: 0; border-top: 1px solid #ddd; margin: 15px 0;">
+            <p style="font-style: italic; color: #666;"><strong>English:</strong> All articles are automatically aggregated by AI. The owner holds zero liability for any errors or inaccuracies.</p>
+        </div>
+    </div>
+
+    <script>
+        // Internet se automated json file read karne ka code
+        fetch('news.json')
+            .then(res => {
+                if(!res.ok) throw new Error();
+                return res.json();
+            })
+            .then(data => {
+                const feed = document.getElementById('news-feed');
+                feed.innerHTML = '';
+                if(!data || data.length === 0) {
+                    feed.innerHTML = '<p style="font-family: Arial;">No updates available for today yet.</p>';
+                    return;
+                }
+                data.forEach(item => {
+                    feed.innerHTML += `
+                        <div class="card">
+                            <div class="meta">${item.category} | ${new Date(item.date).toLocaleDateString()}</div>
+                            <h2>${item.title}</h2>
+                            <p>${item.description || 'Click the link below to read the full report details from the primary source.'}</p>
+                            <a href="${item.url}" target="_blank">Read Original Report →</a>
+                        </div>
+                    `;
+                });
+            })
+            .catch(err => {
+                document.getElementById('news-feed').innerHTML = '<p style="font-family: Arial; color: #c0392b;">System is updating data. Please refresh in a few minutes.</p>';
+            });
+    </script>
+</body>
+</html>
