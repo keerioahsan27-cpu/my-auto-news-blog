@@ -36,19 +36,18 @@
             <p style="font-family: Arial, sans-serif; color: #666;">Loading latest global intelligence report...</p>
         </div>
 
-        <!-- Sidebar Legal Disclaimer Box -->
+        <!-- Sidebar Legal Disclaimer Box (Pure English) -->
         <div class="sidebar">
             <h3>⚠️ AI Notice & Legal Disclaimer</h3>
-            <p><strong>Urdu Notice:</strong> Is website par mojood tamam news aur content automatic tareeqe se AI aur internet APIs ke zariye jama aur post kiya jata hai.</p>
-            <p>Website ka owner is content ko manually verify ya edit nahi karta. Agar is content me koi galti, galat bayani (misinformation), ya copyright ka masla hota hai, to website ka owner iska bilkul zimmedar (Not Responsible) nahi hoga. Users is information ko apne risk par istemal karein.</p>
-            <hr style="border: 0; border-top: 1px solid #ddd; margin: 15px 0;">
-            <p style="font-style: italic; color: #666;"><strong>English:</strong> All articles are automatically aggregated by AI. The owner holds zero liability for any errors or inaccuracies.</p>
+            <p><strong>Automated Content Notice:</strong> All news, data, summaries, and publications displayed on this platform are automatically aggregated, processed, and published using advanced AI automation and internet data pipelines.</p>
+            <p>The website owner does not manually review, verify, edit, or endorse any of the information posted herein. In the event of errors, inaccuracies, misinformation, or potential copyright concerns, the website owner assumes zero legal liability and holds absolute exemption from any responsibility.</p>
+            <p>Readers and users are advised to verify data independently and utilize this content entirely at their own discretion and risk.</p>
         </div>
     </div>
 
     <script>
-        // Internet se automated json file read karne ka code
-        fetch('news.json')
+        // Internet se automated json file read karne ka code aur cache bypass formula
+        fetch('news.json?v=' + new Date().getTime())
             .then(res => {
                 if(!res.ok) throw new Error();
                 return res.json();
@@ -57,7 +56,7 @@
                 const feed = document.getElementById('news-feed');
                 feed.innerHTML = '';
                 if(!data || data.length === 0) {
-                    feed.innerHTML = '<p style="font-family: Arial;">No updates available for today yet.</p>';
+                    feed.innerHTML = '<p style="font-family: Arial;">No updates available for today yet. Automation is running.</p>';
                     return;
                 }
                 data.forEach(item => {
