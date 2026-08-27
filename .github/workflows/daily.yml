@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write # Yeh line robot ko har haal me file save karne ki ijazat deti hai
+  contents: write
 
 jobs:
   build:
@@ -19,15 +19,13 @@ jobs:
       with:
         node-version: '24'
 
-    - name: Fetch Latest News
-      env:
-        NEWS_API_KEY: ${{ secrets.NEWS_API_KEY }}
+    - name: Fetch Latest News and Build Page
       run: node fetch-news.js
 
     - name: Commit and Push changes
       run: |
         git config --global user.name "Auto News Bot"
         git config --global user.email "bot@autonews.com"
-        git add news.json
+        git add index.html
         git commit -m "Automated Daily News Update [skip ci]" || exit 0
         git push origin main
