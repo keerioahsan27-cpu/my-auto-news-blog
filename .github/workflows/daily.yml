@@ -4,17 +4,20 @@ on:
     - cron: '0 0 * * *'
   workflow_dispatch:
 
+permissions:
+  contents: write # Yeh line robot ko har haal me file save karne ki ijazat deti hai
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Setup Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '18'
+        node-version: '24'
 
     - name: Fetch Latest News
       env:
@@ -27,4 +30,4 @@ jobs:
         git config --global user.email "bot@autonews.com"
         git add news.json
         git commit -m "Automated Daily News Update [skip ci]" || exit 0
-        git push
+        git push origin main
