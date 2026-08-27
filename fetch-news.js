@@ -1,92 +1,106 @@
 const fs = require('fs');
 const https = require('https');
 
-// International Financial Monitor ki direct open news feed url
 const url = 'https://ft.com';
+const options = { headers: { 'User-Agent': 'Mozilla/5.0' } };
 
-const options = {
-    headers: {
-        'User-Agent': 'Mozilla/5.0'
-    }
-};
-
-console.log("Fetching fresh global updates...");
+console.log("Generating Premium Live HTML Website...");
 
 https.get(url, options, (res) => {
     let data = '';
-
-    res.on('data', (chunk) => {
-        data += chunk;
-    });
-
+    res.on('data', (chunk) => { data += chunk; });
     res.on('end', () => {
         try {
-            const articles = [];
-            // RSS XML parsing ka bilkul asan aur foolproof formula
+            let newsHTML = '';
             const items = data.split('<item>');
             
             for (let i = 1; i < Math.min(items.length, 11); i++) {
                 const item = items[i];
-                
-                // Title extraction
-                let title = '';
+                let title = 'Global Financial Update';
                 const titleMatch = item.match(/<title>([\s\S]*?)<\/title>/);
-                if (titleMatch) {
-                    title = titleMatch[1].replace(/<!\[CDATA\[|\]\]>/g, '').trim();
-                }
+                if (titleMatch) title = titleMatch[1].replace(/<!\[CDATA\[|\]\]>/g, '').trim();
 
-                // Link extraction
                 let link = 'https://ft.com';
                 const linkMatch = item.match(/<link>([\s\S]*?)<\/link>/);
-                if (linkMatch) {
-                    link = linkMatch[1].trim();
-                }
+                if (linkMatch) link = linkMatch[1].trim();
 
-                // Description extraction
-                let description = 'Click the link below to view full coverage from the primary financial monitoring dashboard.';
+                let description = 'Click below to read full coverage from the primary dashboard.';
                 const descMatch = item.match(/<description>([\s\S]*?)<\/description>/);
-                if (descMatch) {
-                    description = descMatch[1].replace(/<!\[CDATA\[|\]\]>/g, '').replace(/<[^>]*>/g, '').trim();
-                    if (description.length > 150) {
-                        description = description.substring(0, 150) + '...';
-                    }
+                if (descMatch) description = descMatch[1].replace(/<!\[CDATA\[|\]\]>/g, '').replace(/<[^>]*>/g, '').substring(0, 150).trim() + '...';
+
+                let category = 'Finance';
+                if (title.toLowerCase().includes('govt') || title.toLowerCase().includes('policy') || title.toLowerCase().includes('war')) {
+                    category = 'Geopolitics';
                 }
 
-                if (title) {
-                    let category = 'Finance';
-                    const titleLower = title.toLowerCase();
-                    if (titleLower.includes('govt') || titleLower.includes('policy') || titleLower.includes('sanction') || titleLower.includes('biden') || titleLower.includes('china')) {
-                        category = 'Geopolitics';
-                    }
-
-                    articles.push({
-                        title: title,
-                        description: description,
-                        url: link,
-                        date: new Date().toISOString(),
-                        category: category
-                    });
-                }
+                newsHTML += `
+                    <div class="card">
+                        <div class="meta">${category} | LIVE UPDATE</div>
+                        <h2>${title}</h2>
+                        <p>${description}</p>
+                        <a href="${link}" target="_blank">Read Original Report →</a>
+                    </div>
+                `;
             }
 
-            // Fallback backup plan
-            if (articles.length === 0) {
-                articles.push({
-                    title: "International Market Conditions and Geopolitical Monitor",
-                    description: "Global financial dashboards are compiling real-time intelligence feeds. System refresh will complete automatically.",
-                    url: "https://ft.com",
-                    date: new Date().toISOString(),
-                    category: "Finance"
-                });
+            // Agar koi news na mile toh backup dabba
+            if (newsHTML === '') {
+                newsHTML = `
+                    <div class="card">
+                        <div class="meta">Finance | System Notice</div>
+                        <h2>International Market Conditions Monitor</h2>
+                        <p>Global financial dashboards are compiling real-time intelligence feeds. System refresh will complete automatically.</p>
+                        <a href="https://ft.com" target="_blank">View Dashboard →</a>
+                    </div>
+                `;
             }
 
-            fs.writeFileSync('news.json', JSON.stringify(articles, null, 2));
-            console.log("Successfully saved global reports!");
+            // Poori Website ka HTML code jo robot khud likhega
+            const fullPage = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Global Monitor | Finance & Geopolitics</title>
+    <style>
+        body { font-family: 'Georgia', serif; background-color: #fcfbf7; color: #111; margin: 0; padding: 20px; }
+        header { text-align: center; border-bottom: 4px double #0f1c3f; padding-bottom: 15px; margin-bottom: 30px; }
+        header h1 { font-size: 3rem; margin: 0; color: #0f1c3f; letter-spacing: 2px; font-weight: 900; }
+        header p { font-style: italic; color: #555; margin: 5px 0 0 0; font-size: 1.1rem; }
+        .main-container { display: grid; grid-template-columns: 3fr 1fr; gap: 40px; max-width: 1300px; margin: 0 auto; }
+        .news-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
+        @media (max-width: 900px) { .main-container { grid-template-columns: 1fr; } .news-grid { grid-template-columns: 1fr; } }
+        .card { background: white; padding: 25px; border: 1px solid #e2e0d9; box-shadow: 0 4px 6px rgba(0,0,0,0.01); border-top: 3px solid #0f1c3f; }
+        .card h2 { font-size: 1.5rem; margin-top: 0; color: #0f1c3f; line-height: 1.3; }
+        .card .meta { font-size: 0.8rem; color: #b58900; font-weight: bold; margin-bottom: 12px; text-transform: uppercase; font-family: Arial, sans-serif; letter-spacing: 1px; }
+        .card p { font-family: 'Arial', sans-serif; font-size: 0.95rem; line-height: 1.6; color: #333; }
+        .card a { color: #0f1c3f; font-weight: bold; text-decoration: none; font-family: Arial, sans-serif; font-size: 0.9rem; border-bottom: 1px solid #0f1c3f; }
+        .sidebar { background: #f4f6f9; padding: 25px; border-top: 4px solid #c0392b; height: fit-content; position: sticky; top: 20px; }
+        .sidebar h3 { margin-top: 0; color: #c0392b; font-size: 1.1rem; text-transform: uppercase; font-family: Arial, sans-serif; letter-spacing: 1px; }
+        .sidebar p { font-family: Arial, sans-serif; font-size: 0.85rem; line-height: 1.6; color: #444; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>THE GLOBAL MONITOR</h1>
+        <p>Automated Geopolitics & Financial Intelligence — Updated Daily</p>
+    </header>
+    <div class="main-container">
+        <div class="news-grid">${newsHTML}</div>
+        <div class="sidebar">
+            <h3>⚠️ AI Notice & Legal Disclaimer</h3>
+            <p><strong>Automated Content Notice:</strong> All news, data, summaries, and publications displayed on this platform are automatically aggregated, processed, and published using advanced AI automation and internet data pipelines.</p>
+            <p>The website owner does not manually review, verify, edit, or endorse any of the information posted herein. In the event of errors, inaccuracies, misinformation, or potential copyright concerns, the website owner assumes zero legal liability and holds absolute exemption from any responsibility.</p>
+            <p>Readers and users are advised to verify data independently and utilize this content entirely at their own discretion and risk.</p>
+        </div>
+    </div>
+</body>
+</html>`;
+
+            fs.writeFileSync('index.html', fullPage);
+            console.log("Successfully generated brand new index.html with live news!");
         } catch (error) {
             console.error("Parsing Error:", error.message);
         }
     });
-
-}).on("error", (err) => {
-    console.error("Network Error:", err.message);
 });
